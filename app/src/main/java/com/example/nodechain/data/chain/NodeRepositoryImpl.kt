@@ -1,51 +1,67 @@
 package com.example.nodechain.data.chain
 
-import android.content.Context
-import android.content.SharedPreferences
-import com.example.nodechain.data.sharedprefs.CHAIN
 import com.example.nodechain.data.sharedprefs.SharedPrefs
 import com.example.nodechain.domain.chain.NodeRepository
 import com.example.nodechain.domain.model.Node
+import com.example.nodechain.domain.model.generateNodeId
 import com.google.gson.Gson
+import java.util.UUID
 
 class NodeRepositoryImpl(
     private val sharedPrefs: SharedPrefs,
     private val gson: Gson,
-): NodeRepository {
-    private fun createJsonFromNode(node: Node): String {
-        return gson.toJson(node)
+) : NodeRepository {
+    private var root: Node = loadNodeState() ?: Node(id = generateNodeId("root"), parentId = null)
+
+    override fun getRoot(): Node = root
+
+    override fun addNode(parentId: String): Node {
+        val parent = findNode(root, parentId)
+        val newNode = Node(id = generateNodeId(UUID.randomUUID().toString()), parentId = parentId)
+        parent?.children?.add(newNode)
+        saveNodeState(root)
+        return newNode
+    }
+
+    override fun removeNode(id: String) {
+        removeNodeRecursive(root, id)
+        saveNodeState(root)
     }
 
     // Сохранение состояния дерева
-    override fun saveNodeState(node: Node) {
+    private fun saveNodeState(node: Node) {
         val json = createJsonFromNode(node)
         sharedPrefs.saveNodeState(json)
     }
 
     // Загрузка состояния дерева
-    override fun loadNodeState(): Node? {
+    private fun loadNodeState(): Node? {
         val json = sharedPrefs.loadNodeState()
         return gson.fromJson(json, Node::class.java)
     }
 
-    // Получаем корневой узел
-    override fun getRootNode(): Node {
-        return loadNodeState() ?: Node(name = "root") // Если нет сохраненного дерева, создаем корень
+    private fun createJsonFromNode(node: Node): String {
+        return gson.toJson(node)
     }
 
-    // Добавление дочернего узла
-    override fun addChildNode(parent: Node) {
-        val child = Node(name = "child_${parent.children.size + 1}", parent = parent)
-        parent.children.add(child)
-
-        // TODO
-
-        saveNodeState(parent) // Сохраняем состояние дерева
+    private fun findNode(node: Node, id: String): Node? {
+        if (node.id == id) return node
+        for (child in node.children) {
+            val result = findNode(child, id)
+            if (result != null) return result
+        }
+        return null
     }
 
-    // Удаление узла
-    override fun removeNode(node: Node) {
-        node.parent?.children?.remove(node)
-        saveNodeState(node.parent ?: node) // Сохраняем дерево после удаления
+    private fun removeNodeRecursive(parent: Node, id: String): Boolean {
+        val iterator = parent.children.iterator()
+        while (iterator.hasNext()) {
+            val child = iterator.next()
+            if (child.id == id) {
+                iterator.remove()
+                return true
+            } else if (removeNodeRecursive(child, id)) return true
+        }
+        return false
     }
 }

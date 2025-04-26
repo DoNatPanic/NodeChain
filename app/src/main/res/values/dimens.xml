@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="node_name_horizontal_end">40dp</dimen>
+    <dimen name="node_margin_vertical">16dp</dimen>
+    <dimen name="left_guideline_default_value">0.07</dimen>
+    <dimen name="right_guideline_default_value">0.93</dimen>
+    <dimen name="create_node_button_height">44dp</dimen>
+    <dimen name="create_node_button_margin_bottom">32dp</dimen>
+    <dimen name="recycler_view_margin_bottom">16dp</dimen>
+</resources>
