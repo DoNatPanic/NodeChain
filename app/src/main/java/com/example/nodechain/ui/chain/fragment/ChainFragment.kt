@@ -1,11 +1,15 @@
 package com.example.nodechain.ui.chain.fragment
 
+import ChainScreen
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,8 +35,25 @@ class ChainFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentChainBinding.inflate(inflater, container, false)
-        return binding.root
+//        binding = FragmentChainBinding.inflate(inflater, container, false)
+//        return binding.root
+
+        return ComposeView(requireContext()).apply {
+            setContent {
+                MaterialTheme {
+                    ChainScreen(
+                        nodeId = arguments?.getString("nodeId"),
+                        onBack = { findNavController().popBackStack() },
+                        onOpenNode = { newId ->
+                            val bundle = Bundle().apply {
+                                putString("nodeId", newId)
+                            }
+                            findNavController().navigate(R.id.action_self, bundle)
+                        }
+                    )
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

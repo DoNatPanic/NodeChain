@@ -9,7 +9,7 @@ import com.example.nodechain.ui.utils.SingleEventLiveData
 
 class ChainViewModel(private val repository: NodeRepository) : ViewModel() {
 
-    private val nodes = mutableListOf<Node>()
+    val nodes = mutableListOf<Node>()
 
     private var loadedChainData: SingleEventLiveData<SearchResult> = SingleEventLiveData()
     fun loadedChainLiveData(): LiveData<SearchResult> = loadedChainData
